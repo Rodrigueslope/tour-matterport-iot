@@ -1,169 +1,205 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel de Monitoramento - Sede TJ-GO (RBIM CONSULTORIA)</title>
-  <link rel="icon" type="image/png" href="img/logorbim.png">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: row;
-      background: #000;
-      font-family: Arial, sans-serif;
-    }
-    #matterport {
-      flex: 6;
-      height: 100%;
-    }
-    #dashboard {
-      flex: 4;
-      background: #121212;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 20px;
-    }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-    .top-bar {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .logos img {
-      height: 40px;
-      margin-left: 10px;
-    }
-    h1 {
-      font-size: 16px;
-      font-weight: normal;
-    }
-    .gauge-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 10px 0;
-    }
-    canvas {
-      margin: 10px;
-    }
-    .info-text {
-      font-size: 14px;
-      color: #bbb;
-      text-align: center;
-      margin-top: 20px;
-      line-height: 1.4;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Painel de Monitoramento - Sede TJ-GO (RBIM CONSULTORIA)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Chart.js para os gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+        #container {
+            display: flex;
+            width: 100%;
+        }
+        #tour {
+            width: 60%;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #dashboard {
+            width: 40%;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #121212;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            overflow-y: auto;
+        }
+        .logos {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .logos img {
+            height: 40px;
+        }
+        h1 {
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            width: 80%;
+            margin-bottom: 30px;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .legend {
+            text-align: center;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        .alert {
+            color: #ff4c4c;
+            font-weight: bold;
+            margin-top: 10px;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
 </head>
 <body>
 
-<div id="matterport">
-  <iframe src="https://my.matterport.com/show/?m=5HGzJf9o6Ae&play=1" allowfullscreen></iframe>
-</div>
-
-<div id="dashboard">
-  <div class="top-bar">
-    <h1>Painel de Monitoramento - Sede TJ-GO (RBIM CONSULTORIA)</h1>
-    <div class="logos">
-      <img src="img/logorbim.png" alt="Logo RBIM">
-      <img src="img/logotjgo.png" alt="Logo TJGO">
+<div id="container">
+    <div id="tour">
+        <iframe 
+            src="https://my.matterport.com/show/?m=5HGzJf9o6Ae&play=1" 
+            frameborder="0" 
+            allow="fullscreen; vr; accelerometer; gyroscope; magnetometer; xr-spatial-tracking;" 
+            style="width: 100%; height: 100%;">
+        </iframe>
     </div>
-  </div>
 
-  <div class="gauge-container">
-    <canvas id="tempGauge" width="200" height="200"></canvas>
-    <canvas id="humidityGauge" width="200" height="200"></canvas>
-  </div>
+    <div id="dashboard">
+        <div class="logos">
+            <img src="logorbim.png" alt="Logo RBIM">
+            <img src="logotjgo.png" alt="Logo TJ-GO">
+        </div>
 
-  <div class="info-text">
-    <p><strong>Monitoramento em tempo real</strong></p>
-    <p>🔵 Azul: Umidade Atual | 🔴 Vermelho: Temperatura Atual</p>
-    <p>🚨 Alerta visual e sonoro acima de 28°C</p>
-  </div>
+        <h1>Painel de Monitoramento - Sede TJ-GO (RBIM CONSULTORIA)</h1>
+
+        <div class="chart-container">
+            <canvas id="tempGauge"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="humidityGauge"></canvas>
+        </div>
+
+        <div class="legend">
+            🔵 Azul: Umidade Atual <br>🔴 Vermelho: Temperatura Atual <br><br>
+            🚨 Alerta visual e sonoro acima de 28°C
+        </div>
+    </div>
 </div>
 
 <script>
-const apiKey = "d9da98b3560b007a19706897feaa7416";
-const cidade = "Goiania,BR";
+    const tempCtx = document.getElementById('tempGauge').getContext('2d');
+    const humidityCtx = document.getElementById('humidityGauge').getContext('2d');
 
-const tempCtx = document.getElementById('tempGauge').getContext('2d');
-const humCtx = document.getElementById('humidityGauge').getContext('2d');
+    const tempGauge = new Chart(tempCtx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                label: 'Temperatura (°C)',
+                data: [0, 100],
+                backgroundColor: ['#FF3D00', '#424242'],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            cutout: '70%',
+            plugins: {
+                tooltip: { enabled: false },
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: '',
+                    color: '#ffffff',
+                    font: { size: 20 }
+                }
+            }
+        }
+    });
 
-const tempGauge = new Chart(tempCtx, {
-  type: 'doughnut',
-  data: {
-    datasets: [{
-      data: [0, 100],
-      backgroundColor: ['#FF5733', '#2c2c2c']
-    }]
-  },
-  options: {
-    cutout: '75%',
-    plugins: { legend: { display: false } }
-  }
-});
+    const humidityGauge = new Chart(humidityCtx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                label: 'Umidade (%)',
+                data: [0, 100],
+                backgroundColor: ['#2196F3', '#424242'],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            cutout: '70%',
+            plugins: {
+                tooltip: { enabled: false },
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: '',
+                    color: '#ffffff',
+                    font: { size: 20 }
+                }
+            }
+        }
+    });
 
-const humidityGauge = new Chart(humCtx, {
-  type: 'doughnut',
-  data: {
-    datasets: [{
-      data: [0, 100],
-      backgroundColor: ['#3498DB', '#2c2c2c']
-    }]
-  },
-  options: {
-    cutout: '75%',
-    plugins: { legend: { display: false } }
-  }
-});
+    async function updateData() {
+        const response = await fetch('https://api.openweathermap.org/data/2.5/weather?q=Goiania,BR&appid=d9da98b3560b007a19706897feaa7416&units=metric');
+        const data = await response.json();
+        
+        const temp = data.main.temp;
+        const humidity = data.main.humidity;
 
-function beep() {
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const oscillator = audioCtx.createOscillator();
-  const gainNode = audioCtx.createGain();
+        tempGauge.data.datasets[0].data = [temp, 40-temp];
+        tempGauge.options.plugins.title.text = temp.toFixed(1) + '°C';
+        tempGauge.update();
 
-  oscillator.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
-  oscillator.type = 'sine';
-  oscillator.frequency.value = 1000;
-  oscillator.start();
-  setTimeout(() => { oscillator.stop(); }, 200);
-}
+        humidityGauge.data.datasets[0].data = [humidity, 100-humidity];
+        humidityGauge.options.plugins.title.text = humidity.toFixed(0) + '%';
+        humidityGauge.update();
 
-async function atualizarDados() {
-  const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cidade}&units=metric&appid=${apiKey}`);
-  const data = await response.json();
-  const temp = data.main.temp;
-  const hum = data.main.humidity;
+        // Alerta visual + sonoro
+        if (temp > 28) {
+            if (!document.getElementById('alertAudio')) {
+                const beep = document.createElement('audio');
+                beep.setAttribute('id', 'alertAudio');
+                beep.setAttribute('autoplay', '');
+                beep.innerHTML = '<source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">';
+                document.body.appendChild(beep);
+            }
+        } else {
+            const beep = document.getElementById('alertAudio');
+            if (beep) beep.remove();
+        }
+    }
 
-  tempGauge.data.datasets[0].data = [temp, 100 - temp];
-  tempGauge.update();
-
-  humidityGauge.data.datasets[0].data = [hum, 100 - hum];
-  humidityGauge.update();
-
-  if (temp > 28) {
-    alert(`🚨 ALERTA: Temperatura alta detectada! Atual: ${temp.toFixed(1)}°C`);
-    beep();
-  }
-}
-
-atualizarDados();
-setInterval(atualizarDados, 30000);
+    updateData();
+    setInterval(updateData, 300000); // Atualiza a cada 5 minutos
 </script>
 
 </body>
 </html>
+
 
