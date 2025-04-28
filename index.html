@@ -1,133 +1,169 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>RBIM - Painel Inteligente</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-      background-color: #111;
-      color: #eee;
-    }
-    #tour {
-      flex: 2;
-      position: relative;
-    }
-    #dashboard {
-      flex: 1;
-      background: #1b1b1b;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-    }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-    canvas {
-      background: #222;
-      border-radius: 10px;
-      padding: 10px;
-    }
-    .gauge {
-      width: 200px;
-      height: 200px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>RBIM - Painel V2 Inteligente</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #111;
+            color: #eee;
+        }
+        #tour {
+            flex: 2;
+            position: relative;
+        }
+        #dashboard {
+            flex: 1;
+            background: #1b1b1b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-evenly;
+            padding: 20px;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .gauge-container {
+            position: relative;
+            width: 220px;
+            height: 220px;
+        }
+        .gauge-container canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .gauge-text {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+        }
+        #tempChart {
+            width: 90%;
+            max-width: 400px;
+            background: #222;
+            border-radius: 10px;
+            padding: 10px;
+        }
+    </style>
 </head>
 <body>
-  <div id="tour">
+<div id="tour">
     <iframe id="showcase" src="https://my.matterport.com/show/?m=5HGzJf9o6Ae&play=1" allowfullscreen></iframe>
-  </div>
-  <div id="dashboard">
-    <canvas id="tempGauge" class="gauge"></canvas>
-    <canvas id="humidityGauge" class="gauge"></canvas>
-    <canvas id="tempChart" width="300" height="150"></canvas>
-  </div>
+</div>
+
+<div id="dashboard">
+    <div class="gauge-container">
+        <canvas id="tempGauge"></canvas>
+        <div class="gauge-text" id="tempText">-- °C</div>
+    </div>
+    <div class="gauge-container">
+        <canvas id="humidityGauge"></canvas>
+        <div class="gauge-text" id="humidityText">-- %</div>
+    </div>
+    <canvas id="tempChart"></canvas>
+</div>
 
 <script>
 const tempChartCtx = document.getElementById('tempChart').getContext('2d');
 const tempGaugeCtx = document.getElementById('tempGauge').getContext('2d');
 const humidityGaugeCtx = document.getElementById('humidityGauge').getContext('2d');
+const tempText = document.getElementById('tempText');
+const humidityText = document.getElementById('humidityText');
 
 const tempChart = new Chart(tempChartCtx, {
-  type: 'line',
-  data: {
-    labels: [],
-    datasets: [{
-      label: 'Temperatura (°C)',
-      data: [],
-      backgroundColor: 'rgba(0, 172, 193, 0.2)',
-      borderColor: 'rgba(0, 172, 193, 1)',
-      borderWidth: 2,
-      tension: 0.4
-    }]
-  },
-  options: {
-    responsive: true,
-    scales: { y: { beginAtZero: false } },
-    plugins: { legend: { labels: { color: 'white' } } }
-  }
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'Temperatura (°C)',
+            data: [],
+            borderColor: 'rgba(0, 172, 193, 1)',
+            backgroundColor: 'rgba(0, 172, 193, 0.2)',
+            borderWidth: 2,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: { y: { beginAtZero: false, ticks: { color: 'white' } }, x: { ticks: { color: 'white' } }},
+        plugins: { legend: { labels: { color: 'white' } } }
+    }
 });
 
 const tempGauge = new Chart(tempGaugeCtx, {
-  type: 'doughnut',
-  data: {
-    labels: ['Temperatura', 'Faltante'],
-    datasets: [{
-      data: [0, 50],
-      backgroundColor: ['#f44336', '#555']
-    }]
-  },
-  options: { plugins: { legend: { display: false } }, cutout: '70%' }
+    type: 'doughnut',
+    data: {
+        datasets: [{
+            data: [0, 50],
+            backgroundColor: ['#ff5722', '#555']
+        }]
+    },
+    options: {
+        cutout: '70%',
+        plugins: { legend: { display: false } },
+        animation: { animateRotate: true }
+    }
 });
 
 const humidityGauge = new Chart(humidityGaugeCtx, {
-  type: 'doughnut',
-  data: {
-    labels: ['Umidade', 'Faltante'],
-    datasets: [{
-      data: [0, 100],
-      backgroundColor: ['#2196f3', '#555']
-    }]
-  },
-  options: { plugins: { legend: { display: false } }, cutout: '70%' }
+    type: 'doughnut',
+    data: {
+        datasets: [{
+            data: [0, 100],
+            backgroundColor: ['#2196f3', '#555']
+        }]
+    },
+    options: {
+        cutout: '70%',
+        plugins: { legend: { display: false } },
+        animation: { animateRotate: true }
+    }
 });
 
 function atualizarDados() {
-  fetch('https://api.openweathermap.org/data/2.5/weather?q=Goiania,BR&appid=d9da98b3560b007a19706897feaa7416&units=metric')
-    .then(response => response.json())
-    .then(data => {
-      const tempAtual = data.main.temp;
-      const umidadeAtual = data.main.humidity;
+    fetch('https://api.openweathermap.org/data/2.5/weather?q=Goiania,BR&appid=d9da98b3560b007a19706897feaa7416&units=metric')
+        .then(response => response.json())
+        .then(data => {
+            const tempAtual = data.main.temp;
+            const umidadeAtual = data.main.humidity;
 
-      const agora = new Date().toLocaleTimeString();
-      tempChart.data.labels.push(agora);
-      tempChart.data.datasets[0].data.push(tempAtual);
-      if (tempChart.data.labels.length > 10) {
-        tempChart.data.labels.shift();
-        tempChart.data.datasets[0].data.shift();
-      }
-      tempChart.update();
+            const agora = new Date().toLocaleTimeString();
+            tempChart.data.labels.push(agora);
+            tempChart.data.datasets[0].data.push(tempAtual);
+            if (tempChart.data.labels.length > 10) {
+                tempChart.data.labels.shift();
+                tempChart.data.datasets[0].data.shift();
+            }
+            tempChart.update();
 
-      tempGauge.data.datasets[0].data[0] = tempAtual;
-      tempGauge.data.datasets[0].data[1] = 50 - tempAtual;
-      tempGauge.update();
+            tempGauge.data.datasets[0].data[0] = tempAtual;
+            tempGauge.data.datasets[0].data[1] = 50 - tempAtual;
+            tempGauge.update();
+            tempText.textContent = tempAtual.toFixed(1) + ' °C';
 
-      humidityGauge.data.datasets[0].data[0] = umidadeAtual;
-      humidityGauge.data.datasets[0].data[1] = 100 - umidadeAtual;
-      humidityGauge.update();
-    })
-    .catch(error => console.error('Erro ao buscar dados:', error));
+            humidityGauge.data.datasets[0].data[0] = umidadeAtual;
+            humidityGauge.data.datasets[0].data[1] = 100 - umidadeAtual;
+            humidityGauge.update();
+            humidityText.textContent = umidadeAtual + ' %';
+        })
+        .catch(error => console.error('Erro ao buscar dados:', error));
 }
 
 setInterval(atualizarDados, 60000);
