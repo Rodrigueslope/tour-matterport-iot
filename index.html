@@ -1,204 +1,229 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Painel de Monitoramento - Sede TJ-GO (RBIM CONSULTORIA)</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Chart.js para os gráficos -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #121212;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            height: 100vh;
-        }
-        #container {
-            display: flex;
-            width: 100%;
-        }
-        #tour {
-            width: 60%;
-            height: 100vh;
-            overflow: hidden;
-        }
-        #dashboard {
-            width: 40%;
-            padding: 20px;
-            box-sizing: border-box;
-            background-color: #121212;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            overflow-y: auto;
-        }
-        .logos {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-        .logos img {
-            height: 40px;
-        }
-        h1 {
-            font-size: 18px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .chart-container {
-            width: 80%;
-            margin-bottom: 30px;
-            background-color: #1e1e1e;
-            border-radius: 10px;
-            padding: 10px;
-        }
-        .legend {
-            text-align: center;
-            font-size: 14px;
-            margin-top: 20px;
-        }
-        .alert {
-            color: #ff4c4c;
-            font-weight: bold;
-            margin-top: 10px;
-            animation: blink 1s infinite;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Monitoramento - Sede TJ-GO (RBIM CONSULTORIA)</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+      overflow-x: hidden;
+    }
+    .container {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+    }
+    .left {
+      flex: 3;
+      background: #000;
+    }
+    .right {
+      flex: 2;
+      background: #121212;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      overflow-y: auto;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .logos {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-bottom: 5px;
+    }
+    .logos img {
+      height: 40px;
+    }
+    h2 {
+      text-align: center;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .gauge-container {
+      width: 90%;
+      background: #1e1e1e;
+      padding: 10px;
+      border-radius: 12px;
+      margin: 10px 0;
+    }
+    #infoText {
+      text-align: center;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    .alert {
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { background-color: #1e1e1e; }
+      50% { background-color: #8b0000; }
+    }
+    #alertButton {
+      background-color: #ff4500;
+      color: white;
+      padding: 8px 16px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .left, .right {
+        flex: none;
+        width: 100%;
+        height: auto;
+      }
+      .logos {
+        justify-content: center;
+      }
+    }
+  </style>
 </head>
+
 <body>
-
-<div id="container">
-    <div id="tour">
-        <iframe 
-            src="https://my.matterport.com/show/?m=5HGzJf9o6Ae&play=1" 
-            frameborder="0" 
-            allow="fullscreen; vr; accelerometer; gyroscope; magnetometer; xr-spatial-tracking;" 
-            style="width: 100%; height: 100%;">
-        </iframe>
+  <div class="container">
+    <div class="left">
+      <iframe src="https://my.matterport.com/show/?m=5HGzJf9o6Ae&play=1&applicationKey=SUA-API-KEY" allow="fullscreen; vr; accelerometer; gyroscope; magnetometer; xr-spatial-tracking;"></iframe>
     </div>
+    <div class="right">
+      <div class="logos">
+        <img src="logorbim.png" alt="Logo RBIM">
+        <img src="logotjgo.png" alt="Logo TJGO">
+      </div>
+      <h2>Painel de Monitoramento - Sede TJ-GO (RBIM CONSULTORIA)</h2>
+      <button id="alertButton" onclick="enableAlert()">Ativar Alerta Sonoro</button>
 
-    <div id="dashboard">
-        <div class="logos">
-            <img src="logorbim.png" alt="Logo RBIM">
-            <img src="logotjgo.png" alt="Logo TJ-GO">
-        </div>
+      <div id="tempGauge" class="gauge-container">
+        <canvas id="tempChart"></canvas>
+      </div>
 
-        <h1>Painel de Monitoramento - Sede TJ-GO (RBIM CONSULTORIA)</h1>
+      <div id="humGauge" class="gauge-container">
+        <canvas id="humChart"></canvas>
+      </div>
 
-        <div class="chart-container">
-            <canvas id="tempGauge"></canvas>
-        </div>
-
-        <div class="chart-container">
-            <canvas id="humidityGauge"></canvas>
-        </div>
-
-        <div class="legend">
-            🔵 Azul: Umidade Atual <br>🔴 Vermelho: Temperatura Atual <br><br>
-            🚨 Alerta visual e sonoro acima de 28°C
-        </div>
+      <div id="infoText">
+        <strong>Monitoramento em tempo real</strong><br>
+        🔵 Azul: Umidade Atual | 🔴 Vermelho: Temperatura Atual<br>
+        🚨 Alerta visual e sonoro acima de 28°C
+      </div>
     </div>
-</div>
+  </div>
 
-<script>
-    const tempCtx = document.getElementById('tempGauge').getContext('2d');
-    const humidityCtx = document.getElementById('humidityGauge').getContext('2d');
+  <audio id="alertAudio" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 
-    const tempGauge = new Chart(tempCtx, {
-        type: 'doughnut',
-        data: {
-            datasets: [{
-                label: 'Temperatura (°C)',
-                data: [0, 100],
-                backgroundColor: ['#FF3D00', '#424242'],
-                borderWidth: 2
-            }]
-        },
-        options: {
-            cutout: '70%',
-            plugins: {
-                tooltip: { enabled: false },
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: '',
-                    color: '#ffffff',
-                    font: { size: 20 }
-                }
-            }
-        }
-    });
+  <script>
+    let tempChart, humChart;
+    const ctxTemp = document.getElementById('tempChart').getContext('2d');
+    const ctxHum = document.getElementById('humChart').getContext('2d');
+    const alertAudio = document.getElementById('alertAudio');
+    let alertEnabled = false;
 
-    const humidityGauge = new Chart(humidityCtx, {
-        type: 'doughnut',
-        data: {
-            datasets: [{
-                label: 'Umidade (%)',
-                data: [0, 100],
-                backgroundColor: ['#2196F3', '#424242'],
-                borderWidth: 2
-            }]
-        },
-        options: {
-            cutout: '70%',
-            plugins: {
-                tooltip: { enabled: false },
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: '',
-                    color: '#ffffff',
-                    font: { size: 20 }
-                }
-            }
-        }
-    });
-
-    async function updateData() {
-        const response = await fetch('https://api.openweathermap.org/data/2.5/weather?q=Goiania,BR&appid=d9da98b3560b007a19706897feaa7416&units=metric');
-        const data = await response.json();
-        
-        const temp = data.main.temp;
-        const humidity = data.main.humidity;
-
-        tempGauge.data.datasets[0].data = [temp, 40-temp];
-        tempGauge.options.plugins.title.text = temp.toFixed(1) + '°C';
-        tempGauge.update();
-
-        humidityGauge.data.datasets[0].data = [humidity, 100-humidity];
-        humidityGauge.options.plugins.title.text = humidity.toFixed(0) + '%';
-        humidityGauge.update();
-
-        // Alerta visual + sonoro
-        if (temp > 28) {
-            if (!document.getElementById('alertAudio')) {
-                const beep = document.createElement('audio');
-                beep.setAttribute('id', 'alertAudio');
-                beep.setAttribute('autoplay', '');
-                beep.innerHTML = '<source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">';
-                document.body.appendChild(beep);
-            }
-        } else {
-            const beep = document.getElementById('alertAudio');
-            if (beep) beep.remove();
-        }
+    function enableAlert() {
+      alertAudio.play();
+      alertEnabled = true;
+      alertAudio.pause();
+      alertAudio.currentTime = 0;
+      document.getElementById('alertButton').style.display = 'none';
     }
 
-    updateData();
-    setInterval(updateData, 300000); // Atualiza a cada 5 minutos
-</script>
+    tempChart = new Chart(ctxTemp, {
+      type: 'doughnut',
+      data: {
+        labels: ['Temperatura'],
+        datasets: [{
+          label: 'Temperatura (°C)',
+          data: [0, 100],
+          backgroundColor: ['#FF4500', '#333'],
+          borderWidth: 2,
+          circumference: 180,
+          rotation: 270
+        }]
+      },
+      options: {
+        cutout: '70%',
+        plugins: {
+          tooltip: {enabled: false},
+          legend: {display: false},
+          title: {
+            display: true,
+            text: '--°C',
+            color: '#fff',
+            font: {size: 18}
+          }
+        }
+      }
+    });
 
+    humChart = new Chart(ctxHum, {
+      type: 'doughnut',
+      data: {
+        labels: ['Umidade'],
+        datasets: [{
+          label: 'Umidade (%)',
+          data: [0, 100],
+          backgroundColor: ['#1E90FF', '#333'],
+          borderWidth: 2,
+          circumference: 180,
+          rotation: 270
+        }]
+      },
+      options: {
+        cutout: '70%',
+        plugins: {
+          tooltip: {enabled: false},
+          legend: {display: false},
+          title: {
+            display: true,
+            text: '--%',
+            color: '#fff',
+            font: {size: 18}
+          }
+        }
+      }
+    });
+
+    function fetchData() {
+      fetch('https://api.openweathermap.org/data/2.5/weather?q=Goiania,BR&units=metric&appid=d9da98b3560b007a19706897feaa7416')
+      .then(response => response.json())
+      .then(data => {
+        const temp = data.main.temp;
+        const hum = data.main.humidity;
+
+        tempChart.data.datasets[0].data = [temp, 100 - temp];
+        tempChart.options.plugins.title.text = temp.toFixed(1) + '°C';
+        tempChart.update();
+
+        humChart.data.datasets[0].data = [hum, 100 - hum];
+        humChart.options.plugins.title.text = hum + '%';
+        humChart.update();
+
+        if (alertEnabled && temp >= 28) {
+          alertAudio.play();
+          document.getElementById('tempGauge').classList.add('alert');
+        } else {
+          document.getElementById('tempGauge').classList.remove('alert');
+        }
+      });
+    }
+
+    setInterval(fetchData, 30000); // Atualiza a cada 30 segundos
+    fetchData(); // Primeira chamada
+  </script>
 </body>
 </html>
 
