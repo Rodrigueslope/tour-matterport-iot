@@ -207,7 +207,7 @@ async function updateWeather() {
         ventoGauge.data.datasets[0].data = [vento, 30 - vento];
         ventoGauge.update();
 
-        if (alertEnabled && temp >= 28) {
+        if (alertEnabled && temp >= 25) {
             document.getElementById('alertSound').play();
             document.body.style.backgroundColor = "#8B0000";
         } else {
